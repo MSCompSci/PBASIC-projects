@@ -1,0 +1,129 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project 8
+index VAR Nib
+Tindex VAR Nib
+seconds PIN 0
+Tseconds PIN 1
+Tdis VAR Word
+Sdis VAR Word
+time VAR Word
+SSB VAR Nib
+oldval VAR Bit
+offset VAR Word
+mins VAR Nib
+idle VAR Word
+'Start/Stop is IN2
+'Reset is IN3
+OUTH = %00000000
+DIRH = %11111111
+SSB = 0
+OUTH = %11100111
+DO
+SELECT SSB
+
+CASE 0
+  OUTH = %11100111
+  LOW seconds
+  HIGH seconds
+  LOW Tseconds
+  HIGH tseconds
+  IF IN2 = 1 THEN
+    SSB = 1
+    oldval = 1
+    idle = 0
+  ENDIF
+  idle = idle + 1
+  IF idle > 5950 THEN SSB = 3
+
+CASE 1
+  LOOKUP tindex,[%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                 %10110100,%01110110],Tdis
+  LOOKUP index,[%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                %10110100,%01110110,%01110111,%11000100,%11110111,%11110110],Sdis
+  FOR time = 0 TO 350
+    OUTH = Sdis
+    LOW seconds
+    HIGH seconds
+    OUTH = Tdis
+    LOW Tseconds
+    HIGH tseconds
+    IF IN2 = 1 AND oldval = 0 THEN
+      SSB = 2
+      oldval = 1
+    ENDIF
+    IF IN2 = 0 THEN oldval = 0
+  NEXT
+  offset = 0
+  index = index + 1
+  IF index > 9 THEN
+    index = 0
+    Tindex = Tindex + 1
+    IF tindex > 5 THEN
+      tindex = 0
+      mins = mins + 1
+      HIGH 4
+      IF mins = 2 THEN HIGH 5
+      IF mins > 2 THEN
+        LOW 4
+        LOW 5
+        index = 0
+        tindex = 0
+      ENDIF
+    ENDIF
+  ENDIF
+
+
+
+CASE 2
+  OUTH = Sdis
+  LOW seconds
+  HIGH seconds
+  OUTH = Tdis
+  LOW Tseconds
+  HIGH tseconds
+  IF IN3 = 1 THEN
+    SSB = 0
+    tindex = 0
+    index = 0
+    idle = 0
+    mins = 0
+    LOW 4
+    LOW 5
+  ENDIF
+  IF IN2 = 1 AND oldval = 0 THEN
+    SSB = 1
+    oldval = 1
+    offset = time
+    idle = 0
+    FOR time = 0 TO offset
+      OUTH = Sdis
+      LOW seconds
+      HIGH seconds
+      OUTH = Tdis
+      LOW Tseconds
+      HIGH tseconds
+    NEXT
+  ENDIF
+  IF IN2 = 0 THEN oldval = 0
+  idle = idle + 1
+  IF idle > 3100 THEN SSB = 3
+
+
+CASE 3
+LOW 4
+LOW 5
+HIGH seconds
+HIGH Tseconds
+IF IN3 = 1 THEN
+  SSB = 0
+  tindex = 0
+  index = 0
+  idle = 0
+  mins = 0
+ENDIF
+
+
+ENDSELECT
+LOOP

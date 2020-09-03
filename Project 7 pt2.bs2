@@ -1,0 +1,36 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project 7
+' part 2
+index VAR Byte
+val VAR Word
+digit VAR Word
+counter VAR Byte
+val = 11000   'random seed
+
+OUTH = %00000000   'initialize 7-seg display
+DIRH = %11111111
+RANDOM val   ' random value
+DO
+  DO
+  RANDOM val
+  LOOP UNTIL IN3 = 1   'register button press
+  DO
+  LOOP UNTIL IN3 = 0
+  FOR digit = 155 TO 1 '12 second loop
+    RANDOM val    'random number
+    index = val // 10   ' remainder taken for index value
+    LOOKUP index, [%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                %10110100,%01110110,%01110111,%11000100,%11110111,%11110110],OUTH
+    PAUSE 156-digit 'incremental delay
+  NEXT
+  digit = OUTH   'final value registered
+  FOR counter = 0 TO 3  'flash 3 times
+   OUTH = digit
+    PAUSE 500
+    OUTH = %00000000
+    PAUSE 500
+  NEXT
+  OUTH = digit  'hold final value
+LOOP

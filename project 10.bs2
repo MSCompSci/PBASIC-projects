@@ -1,0 +1,55 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project 10
+OUTH = %00000000
+DIRH = %11111111
+OUTL = %00000000
+DIRL = %11111111
+nums VAR Nib
+notenums VAR Nib
+lett VAR Nib
+counter VAR Nib
+seconds VAR Word
+time VAR Word
+index VAR Word
+oldval VAR Nib
+freq VAR Word
+nums = 0
+oldval = 10
+freq = 0
+DO
+HIGH 0 'initialize RC pin
+PAUSE 40
+RCTIME 0,1,time  'Collect RC time
+'DEBUG DEC5 time,CR
+LOOKDOWN time, <=[700,1400,2100,2800,3500,4200,4900,5600,6000,6900],nums 'Find index value for RC time
+
+IF nums = oldval THEN
+  seconds = seconds + 1
+ELSE
+  seconds = 0
+ENDIF
+IF seconds > 50 THEN
+  GOSUB notedisplay
+ELSE
+  LOOKUP nums,[%11100111,%10000100,%11010011,%11010110,%10110100,%01110110,%01110111,%11000100,%11110111,%11110110],OUTH
+  OUTL = %00000000
+ENDIF
+oldval = nums
+LOOP
+
+notedisplay:
+SELECT nums
+  CASE 0,1
+    OUTH = %01110111
+  CASE 2 TO 8
+    OUTH = %11000100
+  CASE 9
+    OUTH = %11110111
+ENDSELECT
+
+LOOKUP nums,[%11111010,%01011110,%01100110,%10011110,%01110110,%01110010,%01101110,%11111010,%01011110,%01100110],OUTL
+LOOKUP nums,[1760,1975,2093,2349,2637,2793,3136,3520,3951,4186],freq
+FREQOUT 11,100,freq
+RETURN

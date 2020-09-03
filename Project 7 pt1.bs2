@@ -1,0 +1,36 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project 7
+' part 1
+index VAR Byte
+val VAR Word
+digit VAR Word
+val = 11000
+OUTH = %00000000
+DIRH = %11111111
+index = 0
+DO
+  DO
+  PAUSE 1
+  LOOP UNTIL IN3 = 1 ' wait for button press
+  DO  'while button is pressed, cycle through numbers 0 to 9
+      LOOKUP index, [%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                    %10110100,%01110110,%01110111,%11000100,%11110111,%11110110],OUTH
+      index = index + 1  'advance index value
+      RANDOM val
+      IF index = 10 THEN  'reset index value after 9 is displayed
+        index = 0
+      ENDIF
+  LOOP UNTIL IN3 = 0
+  index = val // 10   'take the remainder division of the random value to get index
+  LOOKUP index, [%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                %10110100,%01110110,%01110111,%11000100,%11110111,%11110110],digit
+  FOR val = 0 TO 2 'flash final value
+    OUTH = digit
+    PAUSE 500
+    OUTH = %00000000
+    PAUSE 500
+  NEXT
+  OUTH = digit 'hold final value display
+LOOP

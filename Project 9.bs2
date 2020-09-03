@@ -1,0 +1,95 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Project 9
+'open about 600
+'closed
+time VAR Word
+counter VAR Word
+closed VAR Bit
+empty VAR Bit
+tens VAR Nib
+ones VAR Nib
+delayset VAR Bit
+offcount VAR Byte
+blinkdelay CON 10
+limit CON 3000
+closed = 0
+tens = 0
+empty = 0
+offcount = 0
+OUTH = %00000000
+DIRH = %11111111
+OUTL = %00000000
+DIRL = %11111111
+HIGH 3
+FOR counter = 0 TO 20
+  PULSOUT 11, 200
+  PAUSE 20
+NEXT
+DO
+SELECT empty
+
+CASE 0
+GOSUB check
+  IF tens = 3 AND ones > 4 AND NOT ones = 0 THEN delayset = 1
+  IF delayset = 1 THEN
+    FOR offcount = 0 TO blinkdelay
+      OUTH = %00000000
+      OUTL = %00000000
+      GOSUB check
+    NEXT
+    FOR offcount = 0 TO blinkdelay + 5
+      GOSUB display
+    NEXT
+  ELSE
+    GOSUB display
+  ENDIF
+
+
+CASE 1
+OUTL = %01101011
+OUTH = %11100111
+FOR counter = 200 TO 1130 STEP 15
+  PULSOUT 11, counter
+  PAUSE 20
+NEXT
+PAUSE 5000
+FOR counter = 1130 TO 200 STEP 15
+  PULSOUT 11, counter
+  PAUSE 20
+NEXT
+empty = 0
+tens = 0
+ones = 0
+delayset = 0
+OUTH = %11100111
+OUTL = %11111110
+
+ENDSELECT
+LOOP
+
+check:
+  HIGH 3
+  PAUSE 30
+  RCTIME 3, 1, time
+  'DEBUG DEC5 time, CR
+  IF time > limit THEN closed = 1
+  IF closed = 1 AND time < limit THEN
+    closed = 0
+    ones = ones + 1
+    IF ones > 9 THEN
+      ones = 0
+      tens = tens + 1
+    ENDIF
+    IF tens = 4 THEN
+      empty = 1
+      ones = 0
+    ENDIF
+  ENDIF
+RETURN
+
+display:
+    LOOKUP tens,[%11111110,%01101000,%11011101,%11111001,%01101011],OUTL 'Display number on 7 segment from index value
+    LOOKUP ones,[%11100111,%10000100,%11010011,%11010110,%10110100,%01110110,%01110111,%11000100,%11110111,%11110110],OUTH 'Display number on 7 segment from index value
+RETURN
