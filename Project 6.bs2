@@ -1,0 +1,96 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Project 6
+counter VAR Word
+mainpress VAR Nib
+time VAR Word
+index VAR Byte
+ptime VAR Word
+oldindex VAR Byte
+oldin VAR Bit
+OUTH = %00000000 'set 7 segment output
+DIRH = %11111111
+PAUSE 1000   'pause 1 second
+mainpress = 0 'set buttone counter to 0
+oldin = 0
+DO 'main loop
+GOSUB check 'check button
+GOSUB RCcheck 'check potentiometer setting
+SELECT mainpress 'select intermittent, medium, or fast
+  CASE 0 'off
+    OUTH = %00000000 ' no display
+    PULSOUT 0,200 'servo at starting position
+    PAUSE 20
+  CASE 1 'intermittent
+    LOOKUP index,[%10000100,%11010011,%11010110,%10110100,%01110110],OUTH 'potentiometer level displayed
+    GOSUB wipecycle 'servo moves to wipe windshield
+    GOSUB intpause 'intermittent pause
+  CASE 2 'medium
+    OUTH = %11100101 'U displayed
+    GOSUB wipecycle 'servo moves to wipe windshield
+    GOSUB check 'check for button press
+  CASE 3 'fast
+    OUTH = %01110001 'F displayed
+    GOSUB wipecyclefast 'servo moves to wipe windshield quickly
+    GOSUB check' check button
+ENDSELECT
+LOOP
+
+RCcheck: 'checks potentiometer position
+HIGH 6 'initialize RC pin
+PAUSE 40
+RCTIME 6,1,time  'Collect RC time
+LOOKDOWN time, <=[120,240,360,480,600],index 'Find index value for RC time
+LOOKUP index,[10000,8000,6000,4000,2000],ptime 'report time to pause for intermittent
+RETURN
+wipecycle:'servo moves to wipe windshield
+FOR counter = 200 TO 820 STEP 20
+  PULSOUT 0, counter
+  PAUSE 20
+  GOSUB check 'check button
+NEXT
+FOR counter = 820 TO 200 STEP 20
+  PULSOUT 0, counter
+  PAUSE 20
+  GOSUB check 'check button
+NEXT
+RETURN
+check: 'check button
+IF IN1 = 1 AND (oldin = 0) THEN 'input observed
+  oldin = 1 'input registered
+  mainpress = mainpress + 1 'button counter advanced
+  IF mainpress>3 THEN 'button counter resets if max value reached
+    mainpress = 0
+  ENDIF
+ENDIF
+IF IN1 = 0 THEN 'lack of input registered
+  oldin = 0
+ENDIF
+RETURN
+
+intpause:'intermittent pause
+FOR counter = 1 TO ptime/48
+  oldindex = index 'index value registered
+  GOSUB rccheck
+  GOSUB check
+  IF oldindex <> index THEN 'potentiometer monitored for change
+    LOOKUP index,[%10000100,%11010011,%11010110,%10110100,%01110110],OUTH 'new pot value displayed
+  ELSEIF mainpress>1 THEN 'pause exits if medium speed selected
+    EXIT
+  ENDIF
+NEXT
+RETURN
+
+wipecyclefast:'servo moves to wipe windshield quickly
+FOR counter = 200 TO 820 STEP 35
+  PULSOUT 0, counter
+  PAUSE 20
+  GOSUB check
+NEXT
+FOR counter = 820 TO 200 STEP 35
+  PULSOUT 0, counter
+  PAUSE 20
+  GOSUB check
+NEXT
+RETURN

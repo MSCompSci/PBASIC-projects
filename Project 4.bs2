@@ -1,0 +1,241 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project 4
+
+
+' NS crosswalk crosses over NS street
+' EW crosswalk crosses over EW street
+NSG PIN 0 'N-S Green
+NSA PIN 1 'N-S Amber
+NSR PIN 2 'N-S Red
+EWG PIN 3 'E-W Green
+
+EWA PIN 4 'E-W Amber
+EWR PIN 5 'E-W Red
+LAG PIN 6 'Left Arrow Green
+LAA PIN 7 'Left Arrow Amber
+LAR PIN 8 'Left Arrow Red
+
+NSCWG PIN 11 'Green N-S Crosswalk
+NSCWR PIN 12 'Red N-S Crosswalk
+
+EWCWG PIN 9 'Green E-W Crosswalk
+EWCWR PIN 10 'Red E-W Crosswalk
+
+NSCWB PIN 13 'Button for NS crosswalk
+EWCWB PIN 14 'Button for EW crosswalk
+
+
+EWCW VAR Bit 'Flag for EW crosswalk button press
+NSCW VAR Bit 'Flag for NS crosswalk button press
+
+NSRed VAR Bit 'Flag that traffic in NS direction is stopped
+EWred VAR Bit 'Flag that traffic in EW direction is stopped
+
+EWused VAR Nib 'Flag that EW crosswalk has been used in a cycle
+NSused VAR Nib 'Flag that NS crosswalk has been used in a cycle
+
+CWon VAR Bit 'Flag that a crosswalk is active
+time VAR Word 'Timevthat a crosswalk has been active
+
+counter VAR Word 'general counter
+
+Setup:      'Pre opperation setup
+PAUSE 2000  'pause for two seconds
+LOW EWCWG   'crosswalks specified as red
+HIGH EWCWR
+LOW NSCWG
+HIGH NSCWR
+
+main:  'main program loop
+DO
+
+GOSUB allred
+GOSUB LA
+GOSUB EW
+GOSUB NS
+LOOP
+
+
+allred:   'all lights red
+  NSred = 1  'NS traffic is stopped
+  EWred = 1  'EW traffic is stopped
+
+  HIGH NSR  'Set all lights to red 2 sec
+  HIGH EWR
+  HIGH LAR
+  FOR counter = 1 TO 333  'check button for 2 sec
+      GOSUB checkbutton
+      GOSUB checktime
+      IF (EWCW = 1) AND ((3448 - time - 333)>0) THEN ' extends red light if EW crosswalk cycle is unfinished
+         DO
+               GOSUB checkbutton  'continues to check button and time while light is extended
+               GOSUB checktime
+          LOOP UNTIL (time>3448)  'loops until crosswalk finished
+          counter = 333  'exits for loop
+      ENDIF
+  NEXT
+RETURN
+
+LA:
+  EWred = 0  'EW traffic is moving
+  LOW LAR     'Left arrows green for 6 seconds
+  HIGH LAG
+  FOR counter = 1 TO 1000  'check button for 6 sec
+      GOSUB checkbutton
+      GOSUB checktime
+  NEXT
+  LOW LAG
+  HIGH LAA    'Left Arrows Amber for 3 seconds
+  FOR counter = 1 TO 500 'check button for 3 sec
+      GOSUB checkbutton
+      GOSUB checktime
+  NEXT
+  LOW LAA
+  'EWred = 1  'EW traffic is stopped
+  HIGH LAR    'Left Arrows Red for 2 seconds
+  FOR counter = 1 TO 333 'check button for 2 sec
+      GOSUB checkbutton
+      GOSUB checktime
+  NEXT
+RETURN
+
+EW:
+  LOW EWR
+  EWred = 0  'EW traffic is moving
+  HIGH EWG    'East and West Green for 8 seconds
+  FOR counter = 1 TO (1250) 'check button for 8 sec
+      GOSUB checkbutton
+      GOSUB checktime
+      IF (NSCW = 1) AND ((3448 - time - 2083)>0) THEN  ' extends green light if NS crosswalk cycle is unfinished
+        DO
+          GOSUB checkbutton  'continues to check button and time while light is extended
+          GOSUB checktime
+        LOOP UNTIL (time>3448) 'loops until crosswalk finished
+        counter = 1250  'exits for loop
+      ENDIF
+  NEXT
+
+  LOW EWG
+  HIGH EWA    'East and West Amber for 3 seconds
+  FOR counter = 1 TO 500 'check button for 3 sec
+      GOSUB checkbutton
+      GOSUB checktime
+  NEXT
+  LOW EWA
+  EWred = 1  'EW traffic is stopped
+  HIGH EWR    'East and West Red for 2 seconds
+  FOR counter = 1 TO (333) 'check button for 2 sec
+      GOSUB checkbutton
+      GOSUB checktime
+      IF (NSCW = 1) AND ((3448 - time - 333)>0) THEN   ' extends red light if NS crosswalk cycle is unfinished
+        DO
+          GOSUB checkbutton 'continues to check button and time while light is extended
+          GOSUB checktime
+        LOOP UNTIL (time>3448) 'loops until crosswalk finished
+        counter = 333  'exits for loop
+      ENDIF
+  NEXT
+  IF (NSused>0) THEN
+    NSused = NSused - 1  'traffic in EW direction has completed 1 cycle and is counted
+  ENDIF
+RETURN
+
+NS:
+  NSred = 0 'NS traffic is moving
+  LOW NSR
+  HIGH NSG    'North and South Green for 8 seconds
+  FOR counter = 1 TO 1250 'check button for 8 sec
+      GOSUB checkbutton
+      GOSUB checktime
+      IF (EWCW = 1) AND ((3448 - time - 2083)>0) THEN  ' extends green light if NS crosswalk cycle is unfinished
+        DO
+          GOSUB checkbutton  'continues to check button and time while light is extended
+          GOSUB checktime
+        LOOP UNTIL (time>3448)  'loops until crosswalk finished
+        counter = 1250 'exits for loop
+      ENDIF
+  NEXT
+  LOW NSG
+  HIGH NSA    'North and South Amber for 3 seconds
+  FOR counter = 1 TO 500  'check button for 3 sec
+      GOSUB checkbutton
+      GOSUB checktime
+  NEXT
+  LOW NSA
+  IF (EWused>0) THEN
+    EWused = EWused - 1  'traffic in NS direction has completed 1 cycle and is counted
+  ENDIF
+RETURN
+
+checkbutton:
+IF ((IN14 = 1) OR (NSCW = 1)) AND (EWCW = 0) AND (NSused = 0) THEN 'Button press registered
+  NSCW = 1
+  IF (time<2299) AND (NSred = 1)THEN 'solid green phase
+    GOSUB NScross
+  ELSEIF (time>2299) AND (time<3448) THEN 'blinking green phase
+    GOSUB NSblink
+  ELSEIF (time>3448) THEN  'return to red
+    LOW NSCWG
+    HIGH NSCWR
+    NSCW = 0 'reset button press flag
+    CWON = 0  'reset crosswalk active flag
+    NSused = 3 'crosswalk inactive for two cycles
+  ENDIF
+ENDIF
+IF ((IN13 = 1) OR (EWCW = 1)) AND (NSCW = 0) AND (EWused = 0) THEN 'Button press registered
+  EWCW = 1
+  IF (time<2299) AND (EWred = 1)THEN  'solid green phase
+    GOSUB EWcross
+  ELSEIF (time>2299) AND (time<3448) THEN 'blinking green phase
+    GOSUB EWblink
+  ELSEIF (time>3448) THEN  'return to red
+    LOW EWCWG
+    HIGH EWCWR
+    EWCW = 0 'reset button press flag
+    CWON = 0 'reset crosswalk active flag
+    EWused = 3 'crosswalk inactive for two cycles
+  ENDIF
+ENDIF
+RETURN
+
+
+EWcross: 'EW crosswalk solid green phase
+  CWon = 1 ' register that crosswalk is green
+  LOW EWCWR
+  HIGH EWCWG
+RETURN
+
+EWblink: 'EW blinking green phase, 100 on, 100 off
+  CWon = 1 ' register that crosswalk is green
+  LOW EWCWG
+  PAUSE 100
+  HIGH EWCWG
+  PAUSE 100
+  time = time + 22 'time is compensated
+RETURN
+
+NSblink: 'NS blinking green phase, 100 on, 100 off
+  CWon = 1 ' register that crosswalk is green
+  LOW NSCWG
+  PAUSE 100
+  HIGH NSCWG
+  PAUSE 100
+  time = time + 22'time is compensated
+RETURN
+
+NScross: 'NS crosswalk solid green phase
+  CWon = 1
+  LOW NSCWR
+  HIGH NSCWG
+RETURN
+
+
+checktime:  'register time if crosswalk is green
+      IF CWon = 1 THEN
+        time = time + 1
+      ELSE
+        time=0
+      ENDIF
+RETURN

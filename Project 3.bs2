@@ -1,0 +1,116 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+
+'Project 3
+
+'Pushbutton password variables
+PB1NUM VAR Nib
+PB2NUM VAR Nib
+PB3NUM VAR Nib
+
+'Pushbutton Counters
+PB1C VAR Nib
+PB2C VAR Nib
+PB3C VAR Nib
+
+Wrong VAR Bit ' variable = 1 if code or order is wrong
+Total VAR Nib ' total number of pushes
+counter VAR Word ' general counter
+
+'Pushbutton pushes
+PB1NUM = 2
+PB2NUM = 3
+PB3NUM = 4
+
+'Pins
+RLED PIN 14
+YLED PIN 13
+GLED PIN 12
+SERVO PIN 15
+
+FOR counter = 1 TO 20 'Servo to starting position
+  PULSOUT SERVO, 200
+  PAUSE 20
+NEXT
+PAUSE 100  'wait 100 ms
+
+DO
+  'DEBUG CLS
+  Wrong = 0 'set/reset variables
+  PB1C = 0
+  PB2C = 0
+  PB3C = 0
+  Total = PB1NUM + PB2NUM + PB3NUM
+  HIGH RLED 'turn on red led
+  DO
+    IF (IN0 = 1) THEN 'pushbutton 1
+      DO
+        PAUSE 1
+      LOOP UNTIL IN0 = 0
+      PB1C = PB1C + 1
+      Total = Total - 1
+      'DEBUG "PB1C: ",DEC PB1C,CR,"Total: ",DEC TOTAL,CR
+      IF (PB2C >= 1) OR (PB3C >=1) THEN
+        WRONG = 1
+      ENDIF
+    ENDIF
+    IF (IN1 = 1) THEN 'pushbutton 2
+      DO
+        PAUSE 1
+      LOOP UNTIL IN1 = 0
+      PB2C = PB2C + 1
+      Total = Total - 1
+      'DEBUG "PB2C: ",DEC PB2C,CR,"Total: ",DEC TOTAL,CR
+      IF (PB3C >=1) THEN
+        WRONG = 1
+      ENDIF
+    ENDIF
+    IF (IN2 = 1) THEN 'pushbutton 3
+      DO
+        PAUSE 1
+      LOOP UNTIL IN2 = 0
+      PB3C = PB3C + 1
+      Total = Total - 1
+      'DEBUG "PB3C: ",DEC PB3C,CR,"Total: ",DEC TOTAL,CR
+    ENDIF
+  LOOP UNTIL Total = 0
+
+  'checks for correct order and numbers
+  IF (Wrong = 0) AND ((PB1NUM=PB1C)AND(PB2NUM=PB2C)AND(PB3NUM=PB3C)) THEN 'Correct code
+    LOW RLED
+    FOR counter = 1 TO 10 'Blink yellow LED
+      HIGH YLED
+      PAUSE 250
+      LOW YLED
+      PAUSE 250
+    NEXT
+    FOR counter = 200 TO 665 STEP 10 'Move Servo to 90 degrees
+      PULSOUT SERVO, counter
+      PAUSE 20
+    NEXT
+    HIGH GLED   'Green LED on for 10 seconds
+    PAUSE 10000
+    LOW GLED
+    FOR counter = 1 TO 10    'Blink Yellow LED
+      HIGH YLED
+      PAUSE 250
+      LOW YLED
+      PAUSE 250
+    NEXT
+    FOR counter = 665 TO 200 STEP 10 'Return Servo to closed position
+      PULSOUT SERVO, counter
+      PAUSE 20
+    NEXT
+  ELSE 'if incorrect
+    FOR counter = 1 TO 3
+      LOW RLED
+      PAUSE 350
+      HIGH RLED
+      PAUSE 350
+    NEXT
+    'DEBUG "WRONG",CR
+    'PAUSE 2000
+  ENDIF
+
+LOOP

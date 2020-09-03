@@ -1,0 +1,47 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Project 2
+'Introduction to Microprocessors
+NSG PIN 0 'N-S Green
+NSA PIN 1 'N-S Amber
+NSR PIN 2 'N-S Red
+EWG PIN 3 'E-W Green
+
+EWA PIN 4 'E-W Amber
+EWR PIN 5 'E-W Red
+LAG PIN 6 'Left Arrow Green
+LAA PIN 7 'Left Arrow Amber
+LAR PIN 8 'Left Arrow Red
+
+DO
+  HIGH NSR  'Set all lights to red
+  HIGH EWR
+  HIGH LAR
+  PAUSE 2000  'Wait 2 seconds
+  LOW LAR     'Left arrows green for 6 seconds
+  HIGH LAG
+  PAUSE 6000
+  LOW LAG
+  HIGH LAA    'Left Arrows Amber for 3 seconds
+  PAUSE 3000
+  LOW LAA
+  HIGH LAR    'Left Arrows Red for 2 seconds
+  PAUSE 2000
+  LOW EWR
+  HIGH EWG    'East and West Green for 8 seconds
+  PAUSE 8000
+  LOW EWG
+  HIGH EWA    'East and West Amber for 3 seconds
+  PAUSE 3000
+  LOW EWA
+  HIGH EWR    'East and West Red for 2 seconds
+  PAUSE 2000
+  LOW NSR
+  HIGH NSG    'North and South Green for 8 seconds
+  PAUSE 8000
+  LOW NSG
+  HIGH NSA    'North and South Amber for 3 seconds
+  PAUSE 3000
+  LOW NSA
+LOOP

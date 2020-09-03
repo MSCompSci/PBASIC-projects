@@ -1,0 +1,39 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+'Project 5
+
+'assign variables
+index VAR Nib
+time VAR Word
+pos VAR Word
+counter VAR Byte
+servo PIN 5
+
+'initialize pins
+OUTH = %00000000
+DIRH = %11111111
+OUTA = %0000
+DIRA = %1111
+
+
+
+  HIGH 6 'initialize RC pin
+  PAUSE 40
+DO
+  RCTIME 6,1,time  'Collect RC time
+  LOOKDOWN time, <=[60,100,150,180,240,310,390,420,530,700],index 'Find index value for RC time
+  LOOKUP index, [1028,936,844,752,660,568,476,384,292,200],pos 'Find Servo position value from index value
+  LOOKUP index, [%11100111,%10000100,%11010011,%11010110, 'Display number on 7 segment from index value
+                %10110100,%01110110,%01110111,%11000100,%11110111,%11110110],OUTH
+  LOOKUP index, [%0001,%0010,%0010,%0010,%0010,%0010,%0010,%0010,%0010,%0100],OUTA ' LED control
+  LOOKUP index, [1,120,100,80,60,40,30,20,10,1],time 'Delay time selection
+  PAUSE time  'Blink blue LED
+  LOW 1
+  PAUSE time
+  HIGH 6   'Reset for RC time
+  FOR counter = 0 TO 20  'Move servo to position
+    PULSOUT servo,pos
+    PAUSE 20
+  NEXT
+LOOP
