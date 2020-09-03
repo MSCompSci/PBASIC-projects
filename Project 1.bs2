@@ -1,0 +1,354 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
+
+' Project #1
+
+
+' Assignments
+
+' Time durations
+SHORT VAR Byte
+MED VAR Byte
+LONG VAR Word
+
+PatternNum VAR Nib  'Pattern counter
+Counter VAR Word  'Misc counters
+X VAR Nib
+
+RGB VAR Nib   'RGB variable
+
+' Time Durations
+SHORT = 100
+MED = 180
+LONG = 270
+
+
+'LED Colors
+' Yellow: 0,1,14,15
+' Blue: 2,3,12,13
+' Green: 4,5,10,11
+' Red: 6
+' RGB: R=7,G=8,B=9
+' numbered from far to near board, right to left.
+PAUSE 1000 ' Pause at start
+Signal: 'Pattern Change Signal
+DEBUG "Pattern Change Signal", CR
+  FOR Counter = 0 TO 2  ' repeat 3 times
+    HIGH 7     ' Red LEDs and red RGB on
+    HIGH 6
+    PAUSE MED
+    LOW 7      ' Red LEDs and red RGB off
+    LOW 6
+    HIGH 8     'Green LEDs and green RGB on
+    HIGH 10
+    HIGH 4
+    HIGH 11
+    HIGH 5
+    PAUSE MED
+    LOW 8      'Green LEDs and green RGB off
+    LOW 10
+    LOW 4
+    LOW 11
+    LOW 5
+    HIGH 9     'Blue LEDs and blue RGB on
+    HIGH 12
+    HIGH 13
+    HIGH 2
+    HIGH 3
+    PAUSE MED
+    LOW 9     'Blue LEDs and blue RGB off
+    LOW 12
+    LOW 13
+    LOW 2
+    LOW 3
+    PAUSE LONG
+  NEXT
+  ON PatternNum GOTO PatternOne, PatternTwo, PatternThree, PatternFour, PatternFive ' go to next pattern by counter
+  FOR X = 0 TO 2 ' End of cycle Signal
+    HIGH 7
+    PAUSE LONG
+    LOW 7
+    HIGH 8
+    PAUSE LONG
+    LOW 8
+    HIGH 9
+    PAUSE LONG
+    LOW 9
+  NEXT
+  PatternNum = 0 'Pattern Number Counter set to 0
+  GOTO Signal    ' Restart program cycle
+
+
+PatternOne: ' Bloom to Zig-zag pattern
+DEBUG "Pattern 1", CR
+FOR Counter = 0 TO 2
+  'Bloom
+  HIGH 7 'Sustained Red RGB
+  PAUSE MED
+  HIGH 6    ' Two red LEDs flash
+  PAUSE MED
+  LOW 6
+  HIGH 10   ' Green 10 and 4 flash
+  HIGH 4
+  PAUSE MED
+  LOW 10
+  LOW 4
+  'Alternating Zig-Zag
+  FOR X = 0 TO 2
+    HIGH 0      ' Yellow and Blue diagonal LEDs alternate flashing
+    HIGH 15
+    HIGH 12
+    HIGH 3
+    PAUSE MED
+    LOW 0
+    LOW 15
+    LOW 12
+    LOW 3
+    HIGH 2
+    HIGH 13
+    HIGH 14
+    HIGH 1
+    PAUSE LONG
+    LOW 2
+    LOW 13
+    LOW 14
+    LOW 1
+  NEXT
+  LOW 7    ' Red RGB off
+  PAUSE MED
+NEXT
+  PatternNum = PatternNum + 1 'Advance Pattern counter by 1 to go to PatternTwo from Pattern Change
+  GOTO Signal 'Return to Pattern Change Signal
+
+PatternTwo: 'Shrink to blinking
+DEBUG "Pattern 2", CR
+FOR Counter = 0 TO 3  'repeat 4 times
+  ' Shrinking effect
+  HIGH 0           'Yellow LEDs flash
+  HIGH 14
+  HIGH 15
+  HIGH 1
+  PAUSE MED
+  LOW 0
+  LOW 14
+  LOW 15
+  LOW 1
+  HIGH 12        'Blue LEDs flash
+  HIGH 13
+  HIGH 2
+  HIGH 3
+  PAUSE MED
+  LOW 12
+  LOW 13
+  LOW 2
+  LOW 3
+  HIGH 4         'Green LEDs flash
+  HIGH 5
+  HIGH 10
+  HIGH 11
+  PAUSE MED
+  LOW 4
+  LOW 5
+  LOW 10
+  LOW 11
+  FOR X = 0 TO 2  'Blinking 3 times
+    HIGH 6        'Red LEDs and red RGB on
+    HIGH 7
+    HIGH 14       'Yellow LEDs on
+    HIGH 0
+    HIGH 15
+    HIGH 1
+    PAUSE LONG
+    LOW 6        'Yellow and red LEDs and red RGB off
+    LOW 7
+    LOW 14
+    LOW 0
+    LOW 15
+    LOW 1
+    PAUSE SHORT
+    HIGH 6       'Blink red LEDs and red RGB
+    HIGH 7
+    PAUSE MED
+    LOW 6
+    LOW 7
+  NEXT
+NEXT
+  PatternNum = PatternNum + 1     ' pattern advance
+  GOTO Signal    'return to signal
+
+PatternThree: 'Yellow constant w/ changing RBG & swirls
+DEBUG "Pattern 3", CR
+RGB = 7 'RGB set to red
+FOR X = 0 TO 2
+  HIGH RGB ' changing RGB color
+  'Constant Blue LEDs on
+  HIGH 12
+  HIGH 13
+  HIGH 2
+  HIGH 3
+  'Swirls
+  PAUSE LONG
+  LOW RGB     'RGB off
+  HIGH 6      'Red LEDs flash
+  PAUSE MED
+  LOW 6
+  HIGH 10     'Two green LEDs flash
+  HIGH 4
+  PAUSE MED
+  LOW 10
+  LOW 4
+  HIGH 14     'Two yellow LEDs flash
+  HIGH 0
+  PAUSE MED
+  LOW 14
+  LOW 0
+  HIGH 15     'Other two yellow LEDs flash
+  HIGH 1
+  PAUSE MED
+  LOW 15
+  LOW 1
+  HIGH 11     'Other two green LEDs flash
+  HIGH 5
+  PAUSE MED
+  LOW 11
+  LOW 5
+  LOW 12      'Constant blue LEDs off
+  LOW 13
+  LOW 2
+  LOW 3
+  PAUSE LONG
+  RGB = RGB + 1 'RGB to next color
+NEXT
+  PatternNum = PatternNum + 1   'advance to next pattern
+  GOTO Signal  'return to signal
+
+PatternFour: 'starburst
+DEBUG "Pattern 4", CR
+  FOR Counter = 0 TO 4   'repeat five times
+    HIGH 8  'RGB Green flash
+    PAUSE MED
+    LOW 8
+    HIGH 10 'Green  flash
+    HIGH 4
+    HIGH 11
+    HIGH 5
+    PAUSE MED
+    LOW 10
+    LOW 4
+    LOW 11
+    LOW 5
+    HIGH 12  'Blue  flash
+    HIGH 13
+    HIGH 3
+    HIGH 2
+    PAUSE MED
+    LOW 12
+    LOW 13
+    LOW 3
+    LOW 2
+    HIGH 14  'Yellow  flash
+    HIGH 15
+    HIGH 0
+    HIGH 1
+    PAUSE LONG
+    LOW 14
+    LOW 15
+    LOW 0
+    LOW 1
+  NEXT
+  PatternNum = PatternNum + 1   'pattern advance
+  GOTO Signal   'return to signal
+
+PatternFive: 'Speeding up and down w/ Criss-Cross
+DEBUG "Pattern 5", CR
+FOR X = 0 TO 1 'do 2x
+  FOR COUNTER = 100 TO 360 STEP 60 'Slow down
+      HIGH 9    'RGB and LEDs blue flash
+      HIGH 12
+      HIGH 13
+      HIGH 2
+      HIGH 3
+      PAUSE COUNTER 'pause by counter value that increases every loop
+      LOW 9
+      LOW 12
+      LOW 13
+      LOW 2
+      LOW 3
+      HIGH 10      'Two yellow and two green LEDs alternate flashing
+      HIGH 5
+      HIGH 0
+      HIGH 15
+      PAUSE COUNTER
+      LOW 10
+      LOW 5
+      LOW 0
+      LOW 15
+      HIGH 4      ' Other two yellow and two green LEDs alternate flashing
+      HIGH 11
+      HIGH 14
+      HIGH 1
+      PAUSE COUNTER
+      LOW 4
+      LOW 11
+      LOW 14
+      LOW 1
+  NEXT
+  HIGH 8 'Blink green LEDs and RGB to signal change to speeding up
+  HIGH 10
+  HIGH 4
+  HIGH 11
+  HIGH 5
+  PAUSE LONG
+  LOW 8
+  LOW 10
+  LOW 4
+  LOW 11
+  LOW 5
+  FOR COUNTER = 460 TO 100 STEP 60  'speeding up
+      HIGH 9    ' Green RGB and LED flash
+      HIGH 12
+      HIGH 13
+      HIGH 2
+      HIGH 3
+      PAUSE COUNTER
+      LOW 9
+      LOW 12
+      LOW 13
+      LOW 2
+      LOW 3
+      HIGH 10    'Yellow and Green alternate as before
+      HIGH 5
+      HIGH 0
+      HIGH 15
+      PAUSE COUNTER
+      LOW 10
+      LOW 5
+      LOW 0
+      LOW 15
+      HIGH 4
+      HIGH 11
+      HIGH 14
+      HIGH 1
+      PAUSE COUNTER
+      LOW 4
+      LOW 11
+      LOW 14
+      LOW 1
+  NEXT
+  HIGH 0    'All yellow LEDs flash
+  HIGH 1
+  HIGH 14
+  HIGH 15
+  PAUSE LONG + 200  'Longer pause
+  LOW 0
+  LOW 1
+  LOW 14
+  LOW 15
+  HIGH 7      'Red LEDs and RGB flash
+  HIGH 6
+  PAUSE LONG
+  LOW 7
+  LOW 6
+NEXT
+  PatternNum = PatternNum + 1   'advance pattern
+  GOTO Signal  'return to signal
