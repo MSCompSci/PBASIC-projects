@@ -1,5 +1,9 @@
 # PBASIC-projects
-## Collection of projects for the Parallax BASIC Stamp microcontroller
+## Collection of projects for the Parallax BASIC Stamp 2 microcontroller
+
+<p align="center">
+  <a title="Wyatt915, Public domain, via Wikimedia Commons" href="https://commons.wikimedia.org/wiki/File:Basic_Stamp_2.jpg"><img width="128" alt="Basic Stamp 2" src="https://upload.wikimedia.org/wikipedia/commons/9/99/Basic_Stamp_2.jpg"></a>
+</p>
 
 This is a series of projects I completed for a college class on microprocessors. All programs in this repository were programmed in PBASIC using the BASIC Stamp Editor. These projects expanded on the concepts introduced in Version 3.0 of *What's a Microcontroller?* by Andy Lindsay as included in the Basic Stamp kit.
 
@@ -28,5 +32,6 @@ I hope you find these interesting!
 
 ## Relevant Links
 
-- Basic Stamp Editor: https://www.parallax.com/downloads/basic-stamp-software
-- Basic Stamp Kit with *What's a Microcontroller?* V3.0: https://www.parallax.com/product/90005
+- [Basic Stamp Editor](https://www.parallax.com/downloads/basic-stamp-software)
+- [Basic Stamp Kit with *What's a Microcontroller?* V3.0](https://www.parallax.com/product/90005)
+- [Basic Stamp Wikipedia Article](https://en.wikipedia.org/wiki/BASIC_Stamp)
