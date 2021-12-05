@@ -1,7 +1,7 @@
 # PBASIC-projects
 ## Collection of projects for the Parallax BASIC Stamp microcontroller
 
-This is a series of projects I completed for a college class on microprocessors. All programs in this repository were programmed in PBASIC using the BASIC Stamp Editor. These projects expanded on the concepts introduced in Version 3.0 of "What's a Microcontroller?" by Andy Lindsay as included in the Basic Stamp kit.
+This is a series of projects I completed for a college class on microprocessors. All programs in this repository were programmed in PBASIC using the BASIC Stamp Editor. These projects expanded on the concepts introduced in Version 3.0 of *What's a Microcontroller?* by Andy Lindsay as included in the Basic Stamp kit.
 
 PBASIC is a slightly modified version of the BASIC language for Parallax microcontrollers. The main challenge of these projects was to design a responsive system on a microcontroller with limited capabilities. These projects incorperated a wide variety of electronic components including LEDs, servos, 555 timers, potentiometers, 7-segment displays, etc.
 
@@ -29,4 +29,4 @@ I hope you find these interesting!
 ## Relevant Links
 
 - Basic Stamp Editor: https://www.parallax.com/downloads/basic-stamp-software
-- Basic Stamp Kit with "What's a Microcontroller?" V3.0: https://www.parallax.com/product/90005
+- Basic Stamp Kit with *What's a Microcontroller?* V3.0: https://www.parallax.com/product/90005
